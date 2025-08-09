@@ -2,16 +2,21 @@ import pandas as pd
 import streamlit as sl
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('data/superstore_dataset.csv', encoding="ISO-8859-1")
+@sl.cache_data
+def load_data():
+    df = pd.read_csv('data/superstore_dataset.csv', encoding="ISO-8859-1")
+    df['Order Date'] = pd.to_datetime(df['Order Date'])
+    df['Year'] = df['Order Date'].dt.year
+    df['Month'] = df['Order Date'].dt.month
+    df['Year-Month'] = df['Order Date'].dt.to_period('M')
+    return df
 
-df['Order Date'] = pd.to_datetime(df['Order Date'])
-df['Year'] = df['Order Date'].dt.year
-df['Month'] = df['Order Date'].dt.month
-df['Year-Month'] = df['Order Date'].dt.to_period('M')
 
 sl.set_page_config(page_title="Superstore Dashboard", layout='wide')
 sl.title("Superstore Sales Dashbaord")
 sl.markdown("Analyze sales trends, product proformance, and regional distribution")
+
+df = load_data()
 
 years = sorted(df['Year'].unique())
 months = sorted(df['Month'].unique())
