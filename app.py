@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as sl
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 @sl.cache_data
 def load_data():
@@ -21,7 +22,18 @@ df = load_data()
 years = sorted(df['Year'].unique())
 months = sorted(df['Month'].unique())
 regions = sorted(df['Region'].unique())
+sl.sidebar.header("Filters")
 selected_year = sl.sidebar.selectbox("Select Year", years, index=0)
+
+year_min = pd.Timestamp(f"{selected_year}-01-01")
+year_max = pd.Timestamp(f"{selected_year}-12-31")
+
+date_range = sl.sidebar.date_input(
+    "Select Date Rangge",
+    value = [year_min, year_max],
+    min_value=year_min,
+    max_value=year_max,
+)
 
 selected_region = sl.sidebar.multiselect(
     "Select Region(s)",
@@ -29,8 +41,19 @@ selected_region = sl.sidebar.multiselect(
     default=['East']  # All pre-selected
 )
 
-
-filtered_df = df[(df['Year'] == selected_year) & (df['Region'].isin(selected_region))]
+if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
+    start_date, end_date = date_range
+    filtered_df = df[
+        (df['Order Date'] >= pd.to_datetime(start_date)) 
+        & (df['Order Date'] <= pd.to_datetime(end_date))
+        & (df['Region'].isin(selected_region))
+        ]
+else:
+    filtered_df = df[
+        (df['Order Date'] >= pd.to_datetime(year_min)) 
+        & (df['Order Date'] <= pd.to_datetime(year_max))
+        & (df['Region'].isin(selected_region))
+        ]
 
 total_sales = filtered_df['Sales'].sum()
 total_orders = filtered_df['Order ID'].nunique()
@@ -43,6 +66,8 @@ ax.plot(monthly_sales['Year-Month'], monthly_sales['Sales'], marker = "o", lines
 ax.set_title(f"Monthly Sales Trend for {selected_year}")
 ax.set_xlabel("Year-Month")
 ax.set_ylabel("Total Sales")
+ax.xaxis.set_major_locator(mdates.MonthLocator())  
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
 plt.xticks(rotation=45)
 plt.tight_layout()
 
