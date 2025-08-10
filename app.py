@@ -55,6 +55,19 @@ else:
         & (df['Region'].isin(selected_region))
         ]
 
+categories = df['Category'].unique()
+selected_categories = sl.sidebar.multiselect("Select Categories", categories)
+
+# Sub-Category filter (based on selected categories)
+if selected_categories:
+    filtered_df = filtered_df[filtered_df['Category'].isin(selected_categories)]
+    subcategories = filtered_df['Sub-Category'].unique()
+else:
+    subcategories = list(df['Sub-Category'].unique())
+selected_subcategories = sl.sidebar.multiselect("Select Sub-Categories", subcategories)
+if selected_subcategories:
+    filtered_df = filtered_df[filtered_df['Sub-Category'].isin(selected_subcategories)]
+
 total_sales = filtered_df['Sales'].sum()
 total_orders = filtered_df['Order ID'].nunique()
 average_order_value = total_sales / total_orders if total_orders else 0
