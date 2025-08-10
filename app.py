@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as sl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import plotly.express as px
 
 @sl.cache_data
 def load_data():
@@ -94,12 +95,7 @@ ax2.set_title("Top 5 Products")
 plt.tight_layout()
 ax2.tick_params(axis='y', labelsize=8)
 
-
-
-    
-
-
-tab1, tab2, tab3, tab4 = sl.tabs(["Home","Monthlyh Sales","Top Products","Sales by Region"])
+tab1, tab2, tab3, tab4 = sl.tabs(["Home","Monthly Sales","Top Products","Sales by Region"])
 with tab1:
     sl.subheader(f"Year: {selected_year} | Regions: {', '.join(selected_region)}")
     col1, col2, col3 = sl.columns(3)
@@ -110,7 +106,26 @@ with tab1:
         sl.dataframe(filtered_df.head(50))
 with tab2:
     sl.subheader("Monthly Sales Trend")
-    sl.pyplot(fig)
+    fig = px.line(
+        monthly_sales,
+        x='Year-Month',
+        y='Sales',
+        title='Monthly Sales Trend',
+        markers=True
+        )
+    fig.update_layout(
+        xaxis_title='Year-Month',
+        yaxis_title='Total Sales',
+        hovermode='x unified'
+        )
+    fig.update_xaxes(
+        dtick="M1", 
+        tickformat="%b %Y" 
+        )
+
+    sl.plotly_chart(fig, use_container_width=True)
+    
+
 with tab3:
     sl.subheader("Top 5 Products by Sales")
     sl.pyplot(fig2)
