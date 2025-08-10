@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import plotly.express as px
 
+
 @st.cache_data
 def load_data():
     df = pd.read_csv('data/superstore_dataset.csv', encoding="ISO-8859-1")
@@ -38,7 +39,7 @@ date_range = st.sidebar.date_input(
 selected_region = st.sidebar.multiselect(
     "Select Region(s)",
     regions,
-    default=['East']  # All pre-selected
+    default=['East']  
 )
 
 if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
@@ -86,6 +87,7 @@ plt.tight_layout()
 ax2.tick_params(axis='y', labelsize=8)
 
 tab1, tab2, tab3, tab4 = st.tabs(["Home","Monthly Sales","Top Products","Sales by Region"])
+
 with tab1:
     st.subheader(f"Year: {selected_year} | Regions: {', '.join(selected_region)}")
     col1, col2, col3 = st.columns(3)
@@ -94,6 +96,7 @@ with tab1:
     col3.metric("Avg Order Value", f"{average_order_value:,.2f}")
     with st.expander("🔍 View Filtered Data"):
         st.dataframe(filtered_df.head(50))
+
 with tab2:
     st.subheader("Monthly Sales Trend")
     fig = px.line(
@@ -111,13 +114,12 @@ with tab2:
         dtick="M1", 
         tickformat="%b %Y" 
         )
-
     st.plotly_chart(fig, use_container_width=True)
-    
 
 with tab3:
     st.subheader("Top 5 Products by Sales")
     st.pyplot(fig2)
+
 with tab4:
     sales_by_region = filtered_df.groupby('Region')['Sales'].sum().reset_index()
     col1, col2 = st.columns([1, 2])
